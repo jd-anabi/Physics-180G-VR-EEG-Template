@@ -1,0 +1,84 @@
+# ---------------------------------------------------------------------------
+# PARTICIPANT DATA NEVER GOES TO GITHUB
+# Unity writes recordings into Assets/Data and Assets/Logs. Move them to the
+# course's shared data folder after each session (see docs/05-data-and-sync.md).
+# ---------------------------------------------------------------------------
+/[Aa]ssets/[Dd]ata/*
+!/[Aa]ssets/[Dd]ata/.gitkeep
+/[Aa]ssets/[Ll]ogs/*
+!/[Aa]ssets/[Ll]ogs/.gitkeep
+/data/
+/[Ff]inal[Dd]ata*/
+*.edf
+*.bdf
+*.xdf
+# EmotivPRO exports and any other recording files, wherever they end up
+*_intervalMarker.csv
+*EPOCX*.csv
+*eyeTr-*.csv
+*rtData-*.csv
+*events-*.csv
+runData.csv
+
+# ---------------------------------------------------------------------------
+# Unity (generated on each computer; never commit)
+# ---------------------------------------------------------------------------
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Mm]emoryCaptures/
+/[Rr]ecordings/
+/[Aa]ssets/Plugins/Editor/JetBrains*
+/[Aa]ssets/Unity.VisualScripting.Generated*
+.vs/
+.vscode/
+.idea/
+.gradle/
+ExportedObj/
+.consulo/
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+sysinfo.txt
+*.apk
+*.aab
+*.unitypackage
+crashlytics-build.properties
+
+# ---------------------------------------------------------------------------
+# Python / MATLAB
+# ---------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.venv/
+venv/
+*.asv
+figures/
+check_*.png
+
+# ---------------------------------------------------------------------------
+# Operating systems
+# ---------------------------------------------------------------------------
+.DS_Store
+._*
+Thumbs.db
+desktop.ini

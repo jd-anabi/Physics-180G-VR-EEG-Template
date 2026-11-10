@@ -1,0 +1,9 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Binary assets
+*.png binary
+*.jpg binary
+*.ttf binary
+*.psd binary
+*.fbx binary
