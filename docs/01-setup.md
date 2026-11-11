@@ -28,11 +28,39 @@ On a Mac, the Unity editor runs, but the Varjo plugin is Windows-only and we hav
 
 ## Working with Git
 
-- **Pull** (GitHub Desktop: Fetch origin, then Pull) before you start working.
-- Work only in your group's folder. To avoid merge conflicts in scene files, decide inside your group who edits the scene at any given time.
-- **Commit** small steps with a message that says what changed ("Add flicker frequency list", not "update"). **Push** when you stop.
+`main` is protected: nobody can push to it directly. Every change goes in on a **branch**, through a **pull request** that the TA reviews and merges. That keeps one group's half-finished work from breaking another group's scene, and keeps recordings from ever reaching `main`.
+
+### Start a piece of work
+
+1. GitHub Desktop → **Current Branch** (top bar) → make sure `main` is selected → **Fetch origin**, then **Pull origin**.
+2. **Current Branch → New Branch**. Name it after your group and the task, e.g. `groupA-flicker-scene`, `groupC-audio-cue`. Create it based on `main`.
+3. Click **Publish branch**.
+
+If GitHub Desktop ever says you are about to commit to `main`, stop and switch to (or create) your branch. Pushes to `main` are rejected anyway.
+
+### While you work
+
+- Work only in your group's folder (`Assets/GroupA`, `GroupB` or `GroupC`). Inside your group, decide who edits the scene at any given time, so two people never change the same scene file.
+- **Commit** small steps with a message that says what changed ("Add flicker frequency list", not "update"), then **Push origin**. The bottom-left of GitHub Desktop shows which branch you are committing to.
 - Never commit anything from `Assets/Data` or `Assets/Logs`. The `.gitignore` already excludes them; if GitHub Desktop ever lists a recording file as a change, stop and ask.
 - Unity creates a `.meta` file next to every asset. Always commit the `.meta` file together with its asset.
+
+### Ask for a merge
+
+1. When a piece works (it plays from start to end without Console errors), click **Create Pull Request** in GitHub Desktop. Your browser opens.
+2. Title: what the change does. Description: what changed, how you tested it (headset or not), and anything the TA should check.
+3. Click **Create pull request**. The TA reviews it and either merges it or leaves comments.
+4. To respond to comments, keep committing and pushing to the same branch; the pull request updates by itself.
+
+One pull request per working milestone (e.g. "scene runs end to end", "events logged for all conditions") is better than one per commit.
+
+### After a merge
+
+Switch to `main` and pull. To keep working, either start a new branch from `main`, or stay on your branch and use **Branch → Update from main** first, so you have everyone else's merged work.
+
+### Shared files
+
+Changes outside your group folder (`Assets/Scripts/Shared`, `analysis/vreeg.py`, the docs) affect everyone. Open a separate pull request for them and say in the description why the change is needed.
 
 ## On the lab PC
 
