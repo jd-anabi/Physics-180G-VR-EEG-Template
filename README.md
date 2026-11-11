@@ -32,7 +32,7 @@ The project descriptions, schedule and recording-day rules are in the course doc
 
 1. **Participant data never goes on GitHub.** Unity saves recordings inside `Assets/Data` and `Assets/Logs`. Those folders are ignored by Git; move the files to the course's shared data folder after every session. Use participant codes, never names.
 2. **Edit only your own group's folder** (`Assets/GroupA`, `GroupB` or `GroupC`). Unity scene files do not merge well; two people editing the same scene will lose work. If something shared needs to change (`Assets/Scripts/Shared`, `analysis/vreeg.py`), tell the TA and the other groups first.
-3. **Pull before you start, commit and push when you stop.** Small, frequent commits with clear messages.
+3. **Work on a branch and merge through a pull request.** `main` is protected; the TA reviews every pull request before it is merged. See [Working with Git](docs/01-setup.md#working-with-git).
 
 ## Repository map
 

@@ -13,7 +13,7 @@ One participant at a time, about 45 minutes each, all three groups' scenes in on
 
 ## Before the participant arrives
 
-- [ ] Lab PC: GitHub Desktop → pull the latest version; open the project in Unity Hub.
+- [ ] Lab PC: GitHub Desktop → switch to `main` → pull the latest version; open the project in Unity Hub. Record only from `main`, so every recording uses reviewed code.
 - [ ] Varjo Base is running and the headset is tracked.
 - [ ] EmotivPRO is open, the EPOC X is charged, saline and towels are ready.
 - [ ] **EmotivPRO and Unity run on the same PC.** The files only line up because they share that PC's clock.
