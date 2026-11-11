@@ -30,13 +30,14 @@ On a Mac, the Unity editor runs, but the Varjo plugin is Windows-only and we hav
 
 `main` is protected: nobody can push to it directly. Every change goes in on a **branch**, through a **pull request** that the TA reviews and merges. That keeps one group's half-finished work from breaking another group's scene, and keeps recordings from ever reaching `main`.
 
-### Start a piece of work
+### Your group's branch
 
-1. GitHub Desktop → **Current Branch** (top bar) → make sure `main` is selected → **Fetch origin**, then **Pull origin**.
-2. **Current Branch → New Branch**. Name it after your group and the task, e.g. `groupA-flicker-scene`, `groupC-audio-cue`. Create it based on `main`.
-3. Click **Publish branch**.
+Each group has one branch: `groupA-scene`, `groupB-scene` or `groupC-scene`. Everyone in the group commits to it.
 
-If GitHub Desktop ever says you are about to commit to `main`, stop and switch to (or create) your branch. Pushes to `main` are rejected anyway.
+1. GitHub Desktop → **Current Branch** (top bar) → select your group's branch.
+2. Every time you sit down to work: **Fetch origin**, then **Pull origin**, so you have your groupmates' latest commits.
+
+The bottom-left of GitHub Desktop shows which branch you are committing to. If it ever says `main`, switch to your group's branch before committing; pushes to `main` are rejected anyway.
 
 ### While you work
 
@@ -56,11 +57,11 @@ One pull request per working milestone (e.g. "scene runs end to end", "events lo
 
 ### After a merge
 
-Switch to `main` and pull. To keep working, either start a new branch from `main`, or stay on your branch and use **Branch → Update from main** first, so you have everyone else's merged work.
+Stay on your group's branch and use **Branch → Update from main**, then push. That brings in the other groups' merged work and any fixes to the shared code. Do this whenever the TA announces a merge, and before opening a new pull request.
 
 ### Shared files
 
-Changes outside your group folder (`Assets/Scripts/Shared`, `analysis/vreeg.py`, the docs) affect everyone. Open a separate pull request for them and say in the description why the change is needed.
+Changes outside your group folder (`Assets/Scripts/Shared`, `analysis/vreeg.py`, the docs) affect everyone. Tell the TA first, then make them on a separate branch named after the change (e.g. `shared-preprocessing`), created from `main`, and open a pull request that explains why the change is needed.
 
 ## On the lab PC
 
