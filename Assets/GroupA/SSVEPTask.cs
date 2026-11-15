@@ -31,8 +31,8 @@ public class SSVEPTask : ExperimentBase
     public float refreshHz = 90f;
 
     [Header("Conditions")]
-    [Tooltip("Frames per cycle. Frequency = refreshHz / n. At 90 Hz: 15=6, 12=7.5, 10=9, 9=10, 8=11.25, 6=15, 5=18, 4=22.5, 3=30, 2=45 Hz")]
-    public int[] framesPerCycle = { 15, 12, 10, 9, 8, 6, 5, 4, 3, 2 };
+    [Tooltip("Frames per cycle. Frequency = refreshHz / n. At 90 Hz: 15=6, 12=7.5, 10=9, 9=10, 8=11.25, 6=15, 5=18, 4=22.5, 3=30 Hz. (No 2 = 45 Hz: the EPOC X only records up to 43 Hz.)")]
+    public int[] framesPerCycle = { 15, 12, 10, 9, 8, 6, 5, 4, 3 };
     public int repetitions = 4;
     public Waveform waveform = Waveform.Square;
     [Range(0f, 1f)] public float sineDepth = 1f;   // m in L = L0 * (1 + m sin(2 pi f t))
@@ -52,20 +52,37 @@ public class SSVEPTask : ExperimentBase
     public string fixationName = "fixation";
 
     Material patchMaterial;
+    GameObject patch, fixation;
     static readonly CultureInfo Inv = CultureInfo.InvariantCulture;
+
+    // The instruction, break and end texts appear at textPos, which is where the patch sits.
+    // So the patch and fixation are hidden whenever text is on screen.
+    protected override void Start()
+    {
+        patch = GameObject.Find(patchName);       // find them before hiding: Find skips inactive objects
+        fixation = GameObject.Find(fixationName);
+        ShowStimulus(false);
+        base.Start();
+    }
+
+    void ShowStimulus(bool show)
+    {
+        if (patch != null) patch.SetActive(show);
+        if (fixation != null) fixation.SetActive(show);
+    }
 
     protected override IEnumerator RunExperiment()
     {
-        GameObject patch = GameObject.Find(patchName);
         if (patch == null)
         {
             Debug.LogError("SSVEPTask: no object called '" + patchName + "' in the scene.");
             yield break;
         }
         patchMaterial = patch.GetComponent<Renderer>().material;
-        if (GameObject.Find(fixationName) == null)
+        if (fixation == null)
             Debug.LogWarning("SSVEPTask: no fixation object called '" + fixationName + "'.");
         SetLevel(0f);
+        ShowStimulus(true);
 
         // Build and shuffle the trial order (each frequency 'repetitions' times).
         List<int> order = new List<int>();
@@ -92,14 +109,17 @@ public class SSVEPTask : ExperimentBase
             if (breakEvery > 0 && trial % breakEvery == 0 && trial < order.Count)
             {
                 EventLogger.Log("break_start", "", trial);
+                ShowStimulus(false);
                 ShowText("Short break.\nPress Space to continue.");
                 yield return null;
                 while (!Input.GetKeyDown(KeyCode.Space)) yield return null;
                 HideText();
+                ShowStimulus(true);
                 EventLogger.Log("break_end", "", trial);
             }
         }
         yield return new WaitForSecondsRealtime(restMin);
+        ShowStimulus(false);   // out of the way of the end message
     }
 
     IEnumerator Flicker(int n, int trial)
@@ -155,11 +175,24 @@ public class SSVEPTask : ExperimentBase
     }
 
     // level 0 = offColor, 1 = onColor
+    //
+    // The patch is drawn through the material's emission with Exposure Weight = 0. HDRP multiplies
+    // an Unlit material's base color by the camera exposure, so with Fixed Exposure set for a
+    // daylight scene (around 13) a white base color renders almost black. Emission with weight 0
+    // is not affected by exposure, so the patch's brightness doesn't depend on that setting.
     void SetLevel(float level)
     {
         Color c = Color.Lerp(offColor, onColor, level);
-        if (patchMaterial.HasProperty("_UnlitColor")) patchMaterial.SetColor("_UnlitColor", c); // HDRP Unlit
-        if (patchMaterial.HasProperty("_BaseColor")) patchMaterial.SetColor("_BaseColor", c);   // HDRP Lit
+        if (patchMaterial.HasProperty("_EmissiveColor"))
+        {
+            if (patchMaterial.HasProperty("_EmissiveExposureWeight")) patchMaterial.SetFloat("_EmissiveExposureWeight", 0f);
+            if (patchMaterial.HasProperty("_UnlitColor")) patchMaterial.SetColor("_UnlitColor", Color.black); // HDRP Unlit
+            if (patchMaterial.HasProperty("_BaseColor")) patchMaterial.SetColor("_BaseColor", Color.black);   // HDRP Lit
+            patchMaterial.SetColor("_EmissiveColor", c);
+            return;
+        }
+        if (patchMaterial.HasProperty("_UnlitColor")) patchMaterial.SetColor("_UnlitColor", c);
+        if (patchMaterial.HasProperty("_BaseColor")) patchMaterial.SetColor("_BaseColor", c);
         if (patchMaterial.HasProperty("_Color")) patchMaterial.SetColor("_Color", c);
     }
 }
