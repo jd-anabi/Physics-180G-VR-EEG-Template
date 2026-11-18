@@ -14,15 +14,19 @@ using Varjo.XR;
  *   random  new positions and letters every trial, so the participant has to search (T linear in n)
  *   fixed   one layout for the whole block, shown first in a study period, so the participant can learn
  *           where each letter is and only has to choose (Hick: T linear in log2(n+1))
- * Each trial: fixation cross at the panel's center -> the target letter at the center (the cue) ->
- *   the n buttons -> the participant looks at the target button and presses Space.
- *   The button closest to the gaze direction is the answer.
+ * Each trial: fixation cross at the panel's center -> the target letter at the center together with
+ *   the n buttons around it -> the participant looks at the target button and presses Space.
+ *   The button closest to the gaze direction is the answer. The letter and the buttons appear at the
+ *   same moment, so the choice can't be made before RT zero: with the letter shown first, in a fixed
+ *   block the participant would already know where to look when the buttons appear.
  * Without the headset (Use Eye Tracking unticked), the mouse pointer stands in for the gaze.
  *
  * The panel and buttons are built by this script when the experiment starts, so the scene only
  * needs the TaskTemplate objects. The panel sits at textPos. Sizes and positions are in degrees
  * of visual angle, converted to meters with the camera-to-panel distance measured at the start.
  * Buttons sit on a grid (gridColumns x gridRows cells), at most one per cell, jittered inside it.
+ * The cells around the center (the middle 2 x 2 of a 6 x 4 grid) stay empty, so the target letter
+ * never overlaps a button.
  *
  * Brightness: the panel is grey, the buttons slightly lighter and their letters dark, so a button
  * with its letter is about as bright as the panel behind it and the mean luminance hardly changes
@@ -40,12 +44,12 @@ using Varjo.XR;
  *   block_start     "block=1;n=8;layout=fixed"   (block 0 = practice)
  *   baseline_start / baseline_end   fixation cross only, before the block's trials (pupil baseline)
  *   study_start     fixed blocks only: "block=1;n=8;layout=fixed;buttons=K:-7.6:2.4 B:4.9:-7.3 ..."
- *   study_end       (the buttons are shown without a cue in between)
+ *   study_end       (the buttons are shown without a target letter in between)
  *   fixation_on     "block=1;n=8;layout=fixed;i=3"   (i = trial number in the block)
- *   cue_on          "block=1;n=8;layout=fixed;i=3;target=K;rep=1"
- *                   (rep, fixed blocks only = how often K was the target earlier in this block)
  *   buttons_on      "block=1;n=8;layout=fixed;i=3;target=K;rep=1;tx=-7.6;ty=2.4;buttons=K:-7.6:2.4 B:4.9:-7.3 ..."
- *                   (positions in degrees from the panel's center, + = right / up)
+ *                   (the target letter and the buttons appear: RT time zero;
+ *                   rep, fixed blocks only = how often K was the target earlier in this block;
+ *                   positions in degrees from the panel's center, + = right / up)
  *   response        "chosen=K;correct=1;rt_ms=812;px=-7.1;py=2.0;err_deg=0.8;src=gaze"
  *                   (px, py = where the gaze or mouse hit the panel; err_deg = angle to the chosen button)
  *   press_ignored   Space with no valid gaze, or gaze far from every button; the trial goes on
@@ -63,7 +67,7 @@ public class ButtonSearchTask : ExperimentBase
     [Tooltip("Each layout is run with every level. RandomEachTrial: new positions and letters every trial (visual search). " +
              "FixedEachBlock: one layout per block, learned in a study period (Hick). The starting layout alternates with the participant number.")]
     public LayoutMode[] layouts = { LayoutMode.RandomEachTrial, LayoutMode.FixedEachBlock };
-    public int trialsPerBlock = 12;
+    public int trialsPerBlock = 16;
     public int practiceTrials = 4;
     public int practiceLevel = 4;
 
@@ -83,7 +87,6 @@ public class ButtonSearchTask : ExperimentBase
     [Tooltip("Fixed blocks start by showing the buttons for this long per button (at least studyMinSeconds).")]
     public float studySecondsPerButton = 0.6f;
     public float studyMinSeconds = 3f;
-    public float cueSeconds = 1f;
     public float responseWindow = 5f;
     public float interTrial = 0.5f;
 
@@ -108,7 +111,8 @@ public class ButtonSearchTask : ExperimentBase
     Transform cam;
     float viewDist;                 // camera to panel, meters
     GameObject panel;
-    TextMeshPro centerText;         // fixation cross and cue
+    TextMeshPro centerText;         // fixation cross and target letter
+    readonly List<int> cells = new List<int>();   // grid cells buttons may use (all but the center)
     readonly List<GameObject> buttons = new List<GameObject>();
     readonly List<TextMeshPro> labels = new List<TextMeshPro>();
     int nShown;
@@ -128,11 +132,12 @@ public class ButtonSearchTask : ExperimentBase
         EventLogger.Log("settings",
             "viewDist=" + viewDist.ToString("0.000", Inv) +
             ";grid=" + gridColumns + "x" + gridRows +
+            ";emptyCenterCells=" + (gridColumns * gridRows - cells.Count) +
             ";cellDeg=" + cellDeg.ToString(Inv) + ";buttonDeg=" + buttonDeg.ToString(Inv) +
             ";letterDeg=" + letterDeg.ToString(Inv) +
             ";trialsPerBlock=" + trialsPerBlock + ";layouts=" + LayoutNames(layouts) +
             ";studySecondsPerButton=" + studySecondsPerButton.ToString(Inv) + ";studyMinSeconds=" + studyMinSeconds.ToString(Inv) +
-            ";cueSeconds=" + cueSeconds.ToString(Inv) + ";responseWindow=" + responseWindow.ToString(Inv) +
+            ";responseWindow=" + responseWindow.ToString(Inv) +
             ";panel=" + panelColor.r.ToString(Inv) + ";button=" + buttonColor.r.ToString(Inv) +
             ";letter=" + letterColor.r.ToString(Inv) +
             ";input=" + (eyeTracking != null ? "gaze" : "mouse"));
@@ -215,12 +220,8 @@ public class ButtonSearchTask : ExperimentBase
         EventLogger.Log("fixation_on", cond, trial);
         yield return new WaitForSecondsRealtime(Random.Range(fixationMin, fixationMax));
 
+        // The target letter and the buttons appear in the same frame (see the header).
         centerText.text = target;
-        yield return new WaitForEndOfFrame();
-        EventLogger.Log("cue_on", targetCond, trial);
-        yield return new WaitForSecondsRealtime(cueSeconds);
-
-        centerText.text = "";
         ShowButtons(true);
         yield return new WaitForEndOfFrame();
         int ti = System.Array.IndexOf(shownLetters, target);
@@ -270,6 +271,7 @@ public class ButtonSearchTask : ExperimentBase
         if (!answered) EventLogger.Log("timeout", targetCond, trial);
 
         ShowButtons(false);
+        centerText.text = "";
         yield return new WaitForEndOfFrame();
         EventLogger.Log("buttons_off", cond, trial);
         yield return new WaitForSecondsRealtime(interTrial);
@@ -306,12 +308,20 @@ public class ButtonSearchTask : ExperimentBase
             Debug.LogError("ButtonSearchTask: Levels and Layouts each need at least one entry.");
             return false;
         }
+        // Cells whose center is less than one cell from the panel's center (in both directions) stay empty
+        // for the target letter: the middle 2 x 2 of the 6 x 4 grid.
+        cells.Clear();
+        for (int i = 0; i < gridColumns * gridRows; i++)
+        {
+            Vector2 c0 = CellCenterDeg(i);
+            if (Mathf.Abs(c0.x) >= cellDeg || Mathf.Abs(c0.y) >= cellDeg) cells.Add(i);
+        }
         int maxN = practiceTrials > 0 ? practiceLevel : 0;
         foreach (int n in levels) maxN = Mathf.Max(maxN, n);
-        if (maxN > gridColumns * gridRows || maxN > Letters.Length)
+        if (maxN > cells.Count || maxN > Letters.Length)
         {
-            Debug.LogError("ButtonSearchTask: " + maxN + " buttons don't fit the " + gridColumns + "x" + gridRows +
-                           " grid or the " + Letters.Length + " letters.");
+            Debug.LogError("ButtonSearchTask: " + maxN + " buttons don't fit the " + cells.Count + " cells of the " +
+                           gridColumns + "x" + gridRows + " grid outside the center, or the " + Letters.Length + " letters.");
             return false;
         }
 
@@ -338,11 +348,11 @@ public class ButtonSearchTask : ExperimentBase
         return true;
     }
 
-    // Picks n different grid cells and n different letters. Jitter inside a cell keeps
+    // Picks n different cells (outside the center) and n different letters. Jitter inside a cell keeps
     // neighboring buttons at least (cellDeg - buttonDeg) / 2 apart.
     void NewLayout(int n)
     {
-        List<int> cells = Shuffled(gridColumns * gridRows);
+        List<int> pick = Shuffled(cells.Count);
         List<int> letters = Shuffled(Letters.Length);
         float jitter = 0.25f * (cellDeg - buttonDeg);
         nShown = n;
@@ -350,15 +360,21 @@ public class ButtonSearchTask : ExperimentBase
         shownLetters = new string[n];
         for (int i = 0; i < n; i++)
         {
-            int col = cells[i] % gridColumns;
-            int row = cells[i] / gridColumns;
-            float x = (col - (gridColumns - 1) / 2f) * cellDeg + Random.Range(-jitter, jitter);
-            float y = (row - (gridRows - 1) / 2f) * cellDeg + Random.Range(-jitter, jitter);
+            Vector2 c0 = CellCenterDeg(cells[pick[i]]);
+            float x = c0.x + Random.Range(-jitter, jitter);
+            float y = c0.y + Random.Range(-jitter, jitter);
             shownDeg[i] = new Vector2(x, y);
             shownLetters[i] = Letters[letters[i]].ToString();
             buttons[i].transform.localPosition = new Vector3(Meters(x), Meters(y), 0f);
             labels[i].text = shownLetters[i];
         }
+    }
+
+    // Center of grid cell i (row-major, row 0 at the bottom), degrees from the panel's center.
+    Vector2 CellCenterDeg(int i)
+    {
+        return new Vector2((i % gridColumns - (gridColumns - 1) / 2f) * cellDeg,
+                           (i / gridColumns - (gridRows - 1) / 2f) * cellDeg);
     }
 
     void ShowButtons(bool show)

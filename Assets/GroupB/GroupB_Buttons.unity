@@ -1285,9 +1285,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   useEyeTracking: 1
-  instructions: "Look at the + in the middle. A letter appears there: remember it.\nThen
-    buttons appear. Look at the button with that letter and press Space.\nBe quick
-    but accurate. Move your eyes, not your head.\nPress Space to begin."
+  instructions: "Look at the + in the middle. A letter appears there, with buttons around
+    it.\nLook at the button with that letter and press Space.\nBe quick but accurate.
+    Move your eyes, not your head.\nPress Space to begin."
   countdownSeconds: 3
   endMessage: "Thank you! This part is done.\n(Operator: sync gesture, then press Space)"
   baseMaterial: {fileID: 2100000, guid: d269cb9a350b4409b8065e6aef5123ac, type: 2}
