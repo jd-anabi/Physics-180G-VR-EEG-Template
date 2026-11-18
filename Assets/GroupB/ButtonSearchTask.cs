@@ -10,9 +10,12 @@ using Varjo.XR;
 /*
  * ButtonSearchTask (Group B): find one of n lettered buttons on a virtual panel.
  *
- * Each block uses one number of buttons n (default 2, 4, 8, 16). Each trial:
- *   fixation cross at the panel's center -> the target letter at the center (the cue) ->
- *   n buttons at random places -> the participant looks at the target button and presses Space.
+ * Each block uses one number of buttons n (default 2, 4, 8, 16) and one layout:
+ *   random  new positions and letters every trial, so the participant has to search (T linear in n)
+ *   fixed   one layout for the whole block, shown first in a study period, so the participant can learn
+ *           where each letter is and only has to choose (Hick: T linear in log2(n+1))
+ * Each trial: fixation cross at the panel's center -> the target letter at the center (the cue) ->
+ *   the n buttons -> the participant looks at the target button and presses Space.
  *   The button closest to the gaze direction is the answer.
  * Without the headset (Use Eye Tracking unticked), the mouse pointer stands in for the gaze.
  *
@@ -26,17 +29,22 @@ using Varjo.XR;
  * with n (pupil size follows luminance). Colors are drawn as emission with Exposure Weight 0, so
  * the exposure setting doesn't change them (the same approach as Group A's SSVEPTask).
  *
- * Block order: row (participant number mod number of levels) of a balanced Latin square, so P07
- * gets row 3. Block 0 is a short practice block.
+ * Block order: all levels with one layout, then all levels with the other. The participant number p
+ * (the digits of the participant code) sets the order: layouts start at layouts[p mod 2], so odd numbers
+ * start with fixed, and the levels follow row (p mod number of levels) of a balanced Latin square,
+ * the same in both halves. So P07 gets fixed first and row 3. Block 0 is a short practice block (random).
  *
  * Events logged (Trial column = trial number in the session, practice included):
  *   settings        geometry, timing, colors and input source
- *   order           Latin square row and block order, e.g. "row=3;n=16 2 8 4"
- *   block_start     "block=1;n=8;layout=random"   (block 0 = practice)
+ *   order           "row=3;layouts=fixed random;n=16 2 8 4"
+ *   block_start     "block=1;n=8;layout=fixed"   (block 0 = practice)
  *   baseline_start / baseline_end   fixation cross only, before the block's trials (pupil baseline)
- *   fixation_on     "block=1;n=8"
- *   cue_on          "block=1;n=8;target=K"
- *   buttons_on      "block=1;n=8;target=K;tx=-7.6;ty=2.4;layout=K:-7.6:2.4 B:4.9:-7.3 ..."
+ *   study_start     fixed blocks only: "block=1;n=8;layout=fixed;buttons=K:-7.6:2.4 B:4.9:-7.3 ..."
+ *   study_end       (the buttons are shown without a cue in between)
+ *   fixation_on     "block=1;n=8;layout=fixed;i=3"   (i = trial number in the block)
+ *   cue_on          "block=1;n=8;layout=fixed;i=3;target=K;rep=1"
+ *                   (rep, fixed blocks only = how often K was the target earlier in this block)
+ *   buttons_on      "block=1;n=8;layout=fixed;i=3;target=K;rep=1;tx=-7.6;ty=2.4;buttons=K:-7.6:2.4 B:4.9:-7.3 ..."
  *                   (positions in degrees from the panel's center, + = right / up)
  *   response        "chosen=K;correct=1;rt_ms=812;px=-7.1;py=2.0;err_deg=0.8;src=gaze"
  *                   (px, py = where the gaze or mouse hit the panel; err_deg = angle to the chosen button)
@@ -50,11 +58,12 @@ public class ButtonSearchTask : ExperimentBase
     public enum LayoutMode { RandomEachTrial, FixedEachBlock }
 
     [Header("Conditions")]
-    [Tooltip("Number of buttons in each block. With an even number of levels the block order is a balanced Latin square.")]
+    [Tooltip("Number of buttons in each block. With an even number of levels the level order is a balanced Latin square.")]
     public int[] levels = { 2, 4, 8, 16 };
-    public int trialsPerLevel = 20;
-    [Tooltip("RandomEachTrial: new positions and letters every trial (visual search). FixedEachBlock: one layout per block (Hick).")]
-    public LayoutMode layout = LayoutMode.RandomEachTrial;
+    [Tooltip("Each layout is run with every level. RandomEachTrial: new positions and letters every trial (visual search). " +
+             "FixedEachBlock: one layout per block, learned in a study period (Hick). The starting layout alternates with the participant number.")]
+    public LayoutMode[] layouts = { LayoutMode.RandomEachTrial, LayoutMode.FixedEachBlock };
+    public int trialsPerBlock = 12;
     public int practiceTrials = 4;
     public int practiceLevel = 4;
 
@@ -71,6 +80,9 @@ public class ButtonSearchTask : ExperimentBase
     public float baselineSeconds = 5f;
     public float fixationMin = 0.8f;
     public float fixationMax = 1.2f;
+    [Tooltip("Fixed blocks start by showing the buttons for this long per button (at least studyMinSeconds).")]
+    public float studySecondsPerButton = 0.6f;
+    public float studyMinSeconds = 3f;
     public float cueSeconds = 1f;
     public float responseWindow = 5f;
     public float interTrial = 0.5f;
@@ -111,37 +123,36 @@ public class ButtonSearchTask : ExperimentBase
     {
         if (!BuildPanel()) yield break;
 
-        string row;
-        int[] order = BlockOrder(out row);
+        string order;
+        List<Block> blocks = Schedule(out order);
         EventLogger.Log("settings",
             "viewDist=" + viewDist.ToString("0.000", Inv) +
             ";grid=" + gridColumns + "x" + gridRows +
             ";cellDeg=" + cellDeg.ToString(Inv) + ";buttonDeg=" + buttonDeg.ToString(Inv) +
             ";letterDeg=" + letterDeg.ToString(Inv) +
-            ";trialsPerLevel=" + trialsPerLevel + ";layout=" + LayoutName() +
+            ";trialsPerBlock=" + trialsPerBlock + ";layouts=" + LayoutNames(layouts) +
+            ";studySecondsPerButton=" + studySecondsPerButton.ToString(Inv) + ";studyMinSeconds=" + studyMinSeconds.ToString(Inv) +
             ";cueSeconds=" + cueSeconds.ToString(Inv) + ";responseWindow=" + responseWindow.ToString(Inv) +
             ";panel=" + panelColor.r.ToString(Inv) + ";button=" + buttonColor.r.ToString(Inv) +
             ";letter=" + letterColor.r.ToString(Inv) +
             ";input=" + (eyeTracking != null ? "gaze" : "mouse"));
-        EventLogger.Log("order", "row=" + row + ";n=" + string.Join(" ", order));
+        EventLogger.Log("order", order);
 
         if (practiceTrials > 0)
+            yield return StartCoroutine(RunBlock(0, practiceLevel, LayoutMode.RandomEachTrial, practiceTrials));
+        for (int b = 0; b < blocks.Count; b++)
         {
-            yield return StartCoroutine(RunBlock(0, practiceLevel, practiceTrials));
-            yield return StartCoroutine(Pause("Practice done. The real blocks start now.\nPress Space to continue."));
-        }
-        for (int b = 0; b < order.Length; b++)
-        {
-            if (b > 0) yield return StartCoroutine(Pause("Short break.\nPress Space to continue."));
-            yield return StartCoroutine(RunBlock(b + 1, order[b], trialsPerLevel));
+            string intro = b > 0 ? "Short break.\n" : practiceTrials > 0 ? "Practice done. The real blocks start now.\n" : "";
+            yield return StartCoroutine(Pause(intro + Preview(blocks[b].mode) + "\nPress Space to continue."));
+            yield return StartCoroutine(RunBlock(b + 1, blocks[b].n, blocks[b].mode, trialsPerBlock));
         }
         panel.SetActive(false);   // out of the way of the end message
     }
 
-    IEnumerator RunBlock(int block, int n, int nTrials)
+    IEnumerator RunBlock(int block, int n, LayoutMode mode, int nTrials)
     {
-        string cond = "block=" + block + ";n=" + n;
-        EventLogger.Log("block_start", cond + ";layout=" + LayoutName());
+        string cond = "block=" + block + ";n=" + n + ";layout=" + LayoutName(mode);
+        EventLogger.Log("block_start", cond);
 
         // Pupil baseline: the panel with only the fixation cross, so the luminance matches the trials.
         ShowButtons(false);
@@ -151,20 +162,53 @@ public class ButtonSearchTask : ExperimentBase
         yield return new WaitForSecondsRealtime(baselineSeconds);
         EventLogger.Log("baseline_end", cond);
 
-        if (layout == LayoutMode.FixedEachBlock) NewLayout(n);
+        bool fixedLayout = mode == LayoutMode.FixedEachBlock;
+        if (fixedLayout)
+        {
+            // Study period: the block's buttons, without a cue, so the participant can learn where the letters are.
+            NewLayout(n);
+            centerText.text = "";
+            ShowButtons(true);
+            yield return new WaitForEndOfFrame();
+            EventLogger.Log("study_start", cond + ";buttons=" + LayoutString());
+            yield return new WaitForSecondsRealtime(Mathf.Max(studyMinSeconds, studySecondsPerButton * n));
+            ShowButtons(false);
+            yield return new WaitForEndOfFrame();
+            EventLogger.Log("study_end", cond);
+        }
+
+        // In a fixed block the targets are drawn without replacement (refilled when empty), so each button
+        // is the target about equally often; rep counts how often this target came before in the block.
+        List<int> bag = new List<int>();
+        Dictionary<string, int> timesTarget = new Dictionary<string, int>();
         for (int i = 0; i < nTrials; i++)
         {
             trialCount++;
-            if (layout == LayoutMode.RandomEachTrial) NewLayout(n);
-            yield return StartCoroutine(RunTrial(trialCount, cond));
+            string target;
+            int rep = -1;
+            if (fixedLayout)
+            {
+                if (bag.Count == 0) bag = Shuffled(n);
+                target = shownLetters[bag[bag.Count - 1]];
+                bag.RemoveAt(bag.Count - 1);
+                timesTarget.TryGetValue(target, out rep);
+                timesTarget[target] = rep + 1;
+            }
+            else
+            {
+                NewLayout(n);
+                target = shownLetters[Random.Range(0, nShown)];
+            }
+            yield return StartCoroutine(RunTrial(trialCount, cond + ";i=" + (i + 1), target, rep));
         }
         centerText.text = "";
         EventLogger.Log("block_end", cond);
     }
 
-    IEnumerator RunTrial(int trial, string cond)
+    // rep: how often this target came before in the block (fixed layout), or -1 (random layout).
+    IEnumerator RunTrial(int trial, string cond, string target, int rep)
     {
-        string target = shownLetters[Random.Range(0, nShown)];
+        string targetCond = cond + ";target=" + target + (rep >= 0 ? ";rep=" + rep : "");
 
         centerText.text = "+";
         yield return new WaitForEndOfFrame();
@@ -173,16 +217,16 @@ public class ButtonSearchTask : ExperimentBase
 
         centerText.text = target;
         yield return new WaitForEndOfFrame();
-        EventLogger.Log("cue_on", cond + ";target=" + target, trial);
+        EventLogger.Log("cue_on", targetCond, trial);
         yield return new WaitForSecondsRealtime(cueSeconds);
 
         centerText.text = "";
         ShowButtons(true);
         yield return new WaitForEndOfFrame();
         int ti = System.Array.IndexOf(shownLetters, target);
-        long onset = EventLogger.Log("buttons_on", cond + ";target=" + target +
+        long onset = EventLogger.Log("buttons_on", targetCond +
                                                    ";tx=" + F(shownDeg[ti].x) + ";ty=" + F(shownDeg[ti].y) +
-                                                   ";layout=" + LayoutString(), trial);
+                                                   ";buttons=" + LayoutString(), trial);
 
         // Key presses are checked once per frame (about every 11 ms at 90 Hz).
         float t0 = Time.realtimeSinceStartup;
@@ -223,7 +267,7 @@ public class ButtonSearchTask : ExperimentBase
             }
             yield return null;
         }
-        if (!answered) EventLogger.Log("timeout", cond + ";target=" + target, trial);
+        if (!answered) EventLogger.Log("timeout", targetCond, trial);
 
         ShowButtons(false);
         yield return new WaitForEndOfFrame();
@@ -255,6 +299,11 @@ public class ButtonSearchTask : ExperimentBase
         if (baseMaterial == null && Shader.Find("HDRP/Unlit") == null)
         {
             Debug.LogError("ButtonSearchTask: set Base Material to an HDRP/Unlit material.");
+            return false;
+        }
+        if (levels.Length == 0 || layouts.Length == 0)
+        {
+            Debug.LogError("ButtonSearchTask: Levels and Layouts each need at least one entry.");
             return false;
         }
         int maxN = practiceTrials > 0 ? practiceLevel : 0;
@@ -328,35 +377,61 @@ public class ButtonSearchTask : ExperimentBase
         return sb.ToString();
     }
 
-    string LayoutName()
+    static string LayoutName(LayoutMode mode)
     {
-        return layout == LayoutMode.RandomEachTrial ? "random" : "fixed";
+        return mode == LayoutMode.RandomEachTrial ? "random" : "fixed";
     }
 
-    // Balanced Latin square (Williams design): row 0 is 0, 1, k-1, 2, k-2, ...; row r adds r to each entry.
-    int[] BlockOrder(out string row)
+    static string LayoutNames(LayoutMode[] modes)
+    {
+        string[] names = new string[modes.Length];
+        for (int i = 0; i < modes.Length; i++) names[i] = LayoutName(modes[i]);
+        return string.Join(" ", names);
+    }
+
+    // What the pause screen says about the next block.
+    static string Preview(LayoutMode mode)
+    {
+        return mode == LayoutMode.RandomEachTrial
+            ? "In the next block the buttons move every time."
+            : "In the next block the buttons stay in the same places.\nFirst you see them for a few seconds: learn where each letter is.";
+    }
+
+    struct Block
+    {
+        public int n;
+        public LayoutMode mode;
+    }
+
+    // All levels with one layout, then all levels with the next. With participant number p, the layouts start
+    // at layouts[p mod layouts] and the levels follow row (p mod levels) of a balanced Latin square
+    // (Williams design: row 0 is 0, 1, k-1, 2, k-2, ...; row r adds r to each entry), the same in each half.
+    // Without a number in the participant code, p is random and the row is logged as e.g. "2(random)".
+    List<Block> Schedule(out string order)
     {
         int k = levels.Length;
+        int m = layouts.Length;
         string digits = "";
         foreach (char ch in SessionInfo.ParticipantID) if (char.IsDigit(ch)) digits += ch;
-        int num, r;
-        if (digits.Length > 0 && int.TryParse(digits, out num))
-        {
-            r = num % k;
-            row = r.ToString();
-        }
-        else
-        {
-            r = Random.Range(0, k);
-            row = r + "(random)";
-        }
-        int[] order = new int[k];
+        int p = 0;
+        bool known = digits.Length > 0 && int.TryParse(digits, out p);
+        if (!known) p = Random.Range(0, k * m);
+        int r = p % k;
+
+        int[] ns = new int[k];
         for (int i = 0; i < k; i++)
         {
             int j = (i % 2 == 1) ? (i + 1) / 2 : (k - i / 2) % k;
-            order[i] = levels[(j + r) % k];
+            ns[i] = levels[(j + r) % k];
         }
-        return order;
+        LayoutMode[] modes = new LayoutMode[m];
+        for (int i = 0; i < m; i++) modes[i] = layouts[(i + p) % m];
+
+        List<Block> blocks = new List<Block>();
+        foreach (LayoutMode mode in modes)
+            foreach (int n in ns) blocks.Add(new Block { n = n, mode = mode });
+        order = "row=" + r + (known ? "" : "(random)") + ";layouts=" + LayoutNames(modes) + ";n=" + string.Join(" ", ns);
+        return blocks;
     }
 
     // ------------------------------------------------------------------ gaze and pointer
