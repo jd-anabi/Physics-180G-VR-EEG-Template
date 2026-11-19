@@ -12,69 +12,65 @@ Keep this file up to date. The analysis depends on it.
 
 The scene is copied from the shared task template so it retains the XR rig,
 eye-tracking setup, participant-ID flow, instructions, and session/event logging.
-During the experiment the camera background is white and a black X is fixed in
-the center of the headset view. Template demo objects are hidden. The fixation
-display stays the same during task and rest blocks. The scene's copied HDRP sky
-volume is disabled so its atmospheric ground/horizon cannot replace the white
-camera background. The X is drawn with two black bars on a world-space UI canvas
-attached to the headset camera, rather than reusing the template's 3D text.
+It uses the shared `ExperimentBase` session flow. During audio playback the
+camera background is neutral gray and a black X is fixed in the center of the
+headset view. Template demo objects are hidden. The scene has its own HDRP
+volume profile: exposure is fixed, while sky and fog are disabled. The X is
+drawn with two black bars on a world-space UI canvas attached to the headset
+camera. The shared session prompts and participant-ID panel are also positioned
+relative to the headset camera so they remain in view in VR.
 
-## Running the starter task
+Check the gray background brightness in the headset before collecting data.
+Adjust it only after a test run with the actual headset, since perceived
+brightness depends on the headset display and exposure configuration.
+
+## Continuous audio and cue timeline
 
 1. Open `GroupC_MentalArithmetic.unity` in Unity.
-2. Select **Stim Control** and assign `startingNumberClip` to a recorded audio
-   clip containing the starting number. Keep the audio clip in this folder so
-   project changes stay within `Assets/GroupC`. The scene has one persistent
-   AudioSource on Stim Control; the script copies this clip to it at startup,
-   so Play mode should not create a new audio component.
-3. Set `taskRestPairs`, `arithmeticStep`, `minBlockDuration`, and
-   `maxBlockDuration` to the values approved for the study. The starter scene
-   is configured for one task/rest pair, a step of 7, and independently
-   randomized 20–30 second blocks; these are example settings, not a finalized
-   study protocol.
-4. Set `speechMarkerKey` to the operator's key (default **Return**) and
-   `speechMarkerTime` to the intended speech timing (default **12 seconds**
-   after rest begins).
+2. Select **Stim Control** and confirm `audioTrack` is assigned to
+   `finalfinal_script_interleaved.mp3`. The scene has a persistent AudioSource on this object,
+   and the clip is configured to preload so playback can be scheduled without
+   the first-play loading delay.
+3. The **Cue Timeline** on Stim Control has 87 entries, converted from the
+   provided `mm:ss:hundredths` timestamps to seconds from the start of the
+   audio. It logs each task start/end, recovery-rest start/end, and
+   post-speech-rest start/end, plus the intro, initial rest start, and final
+   prompt. Phase windows use the explicit start and end times from the supplied
+   schedule; the short gaps between windows are preserved rather than treated
+   as overlap.
+4. Set `speechMarkerKey` to the operator's marker key (default **Return**).
+   The operator presses it each time the participant answers aloud. Every press
+   during playback is logged with the audio position and the most recent cue.
 5. In Play mode, focus the ID field (press Space or click it), type a
-   non-empty participant ID, and submit it with Enter. The Group C scene listens
-   to the input field's submit event and disables the ID canvas once submitted.
-   The instructions appear after ID submission, with the X hidden. Press Space
-   to show the 3-2-1 countdown; when it finishes, the X appears and the first
-   task block's starting-number audio plays. The X remains visible through all
-   task/rest blocks and the end-of-session prompt. At the end, press Space again
-   to close the session.
-   At each task onset the assigned audio clip plays from its beginning. The task
-   block lasts at least as long as the clip, even if its randomized duration
-   would otherwise be shorter, so the clip is not cut off. During the following
-   rest, the Console notes the expected speech timing; the operator presses the
-   marker key when the participant says the final number.
-6. Test the scene and audio in the headset before collecting data. The headset
-   has no built-in speakers, so use earbuds or PC speakers.
+   non-empty participant ID, and submit it with Enter. The shared session flow
+   moves the ID canvas out of view after submission. Instructions appear with
+   the X hidden. Press Space for the 3-2-1 countdown; the X appears as the
+   experiment starts and stays visible for the full recording. It is hidden
+   before the shared end prompt. Press Space at the end prompt to close the
+   session; Escape aborts early.
+6. Test the cue times and audio in the headset before collecting data. The
+   headset has no built-in speakers, so use earbuds or PC speakers.
 
 ## Events logged
 
 | Event | Value | When it is logged |
 |---|---|---|
-| `block_start` | `task step=7 duration_s=... audio_s=...` | At each task block onset, as the starting-number audio starts |
-| `block_end` | Matching task value | After the full audio clip has played and the task duration has elapsed |
-| `block_start` | `rest duration_s=...` | At each rest block onset |
-| `speech_marker_target` | `rest target_elapsed_s=12.00` | At the configured target time after rest begins |
-| `speech_marker` | `rest elapsed_s=...` | When the operator presses the marker key during rest |
-| `speech_marker_missing` | `rest` | At rest end if no marker key was pressed |
-| `block_end` | Matching rest value | At the end of each rest block |
+| `audio_track_scheduled` | Track duration | Immediately before scheduled playback |
+| `audio_track_start` | Track duration | When scheduled playback begins |
+| `audio_cue` | `audio_s=... meaning=...` | When playback reaches each configured cue time; Trial is the cue's 1-based entry number |
+| `speech_marker` | `audio_s=... after_cue=...` | Every time the operator presses the marker key during the track |
+| `audio_track_end` | Track duration | When the full recording finishes |
 
 ## Conditions and trial counts
 
-- The run is finite: one task block followed by one rest block per
-  `taskRestPairs` setting, then an end-of-session prompt. Keep a defined block
-  count and duration for interpretable EEG/event data; stop earlier with Escape
-  if needed.
-- Each block duration is independently drawn with `Random.Range(minBlockDuration, maxBlockDuration)`.
-- If the starting-number clip is longer than the randomized task duration, the
-  task block is extended to the clip length. The audio is stopped at task-block
-  end; the rest block then begins.
-- The operator should mark the participant's spoken final number about 12 seconds
-  into the rest block. Compare `speech_marker` with `speech_marker_target` in
-  the event log; the keypress timestamp marks the actual speech.
-- Confirm the block count, starting numbers, arithmetic rule, and marker timing
-  with the study protocol before recording participants.
+- One run plays the continuous recording once. Cue events divide it into
+  meaningful analysis segments; this avoids treating a 13-minute recording as
+  one task block and then repeating it for a rest block.
+- The operator should press the marker key at each spoken answer. Unity logs
+  each marker while the audio is playing and associates it with the most recent
+  configured cue.
+- Cue event timestamps are detected on Unity's frame updates as the audio
+  playback position passes the configured time, so they have frame-level timing
+  precision. The log also stores the intended audio position.
+- Confirm cue onset times and meanings against the recording/protocol before
+  collecting data. Stop early with Escape if needed.
