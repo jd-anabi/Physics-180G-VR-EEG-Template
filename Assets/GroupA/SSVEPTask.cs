@@ -31,8 +31,8 @@ public class SSVEPTask : ExperimentBase
     public float refreshHz = 90f;
 
     [Header("Conditions")]
-    [Tooltip("Frames per cycle. Frequency = refreshHz / n. At 90 Hz: 15=6, 12=7.5, 10=9, 9=10, 8=11.25, 6=15, 5=18, 4=22.5, 3=30 Hz. (No 2 = 45 Hz: the EPOC X only records up to 43 Hz.)")]
-    public int[] framesPerCycle = { 15, 12, 10, 9, 8, 6, 5, 4, 3 };
+    [Tooltip("Frames per cycle. Frequency = refreshHz / n. At 90 Hz: 15=6, 12=7.5, 10=9, 9=10, 8=11.25, 7=12.86, 6=15, 5=18, 4=22.5, 3=30 Hz. (No 2 = 45 Hz: the EPOC X only records up to 43 Hz.)")]
+    public int[] framesPerCycle = { 15, 12, 10, 9, 8, 7, 6, 5, 4, 3 };
     public int repetitions = 4;
     public Waveform waveform = Waveform.Square;
     [Range(0f, 1f)] public float sineDepth = 1f;   // m in L = L0 * (1 + m sin(2 pi f t))
