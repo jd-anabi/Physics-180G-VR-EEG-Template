@@ -87,7 +87,7 @@ Then check on the headset that the patch still looks right (without ACES, bright
 
 ## Before recording
 
-- Check the frame rate on the headset. A test run on 19 Nov logged `long_frames=717` in one 8 s trial (≈50 fps instead of 90), which shifts every frequency. Each `segment_end` row reports dropped frames; they should be 0.
+- Check the frame rate on the lab PC with the headset. The stimulus phase advances by f / 90 per rendered frame, so dropped frames lower every frequency. Each `segment_end` row reports dropped frames; they should be 0. (Test runs on a laptop without the headset don't reach 90 fps, so their `long_frames` counts don't say anything about recording day.)
 
 ## Events logged
 
