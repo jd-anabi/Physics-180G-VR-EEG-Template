@@ -65,6 +65,20 @@ public class GroupCMentalArithmetic : ExperimentBase
             }
         }
 
+        GameObject nameInputObject = GameObject.Find("nameInputField");
+        TMP_InputField nameInput = nameInputObject != null
+            ? nameInputObject.GetComponent<TMP_InputField>()
+            : null;
+        if (nameInput != null)
+        {
+            nameInput.textComponent.color = new Color32(0x22, 0x22, 0x22, 0xFF);
+            TMP_Text placeholderText = nameInput.placeholder as TMP_Text;
+            if (placeholderText != null)
+            {
+                placeholderText.color = new Color32(0x66, 0x66, 0x66, 0xFF);
+            }
+        }
+
         fixationCanvasObject = CreateFixationCross(mainCamera);
         fixationCanvasObject.SetActive(false);
 

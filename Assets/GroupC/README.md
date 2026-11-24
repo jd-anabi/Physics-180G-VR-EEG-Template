@@ -19,7 +19,8 @@ hidden. The scene has its own HDRP volume profile: exposure is fixed, while sky
 and fog are disabled. The X is drawn with two black bars on a world-space UI
 canvas attached to the headset camera. The shared session prompts and
 participant-ID panel are also positioned relative to the headset camera so
-they remain in view in VR.
+they remain in view in VR. The participant-ID field uses dark text and a gray
+placeholder for contrast against its white background.
 
 Check the gray background brightness in the headset before collecting data.
 Adjust it only after a test run with the actual headset, since perceived
