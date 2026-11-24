@@ -55,27 +55,25 @@ public class GroupCMentalArithmetic : ExperimentBase
         AttachSessionUiToCamera(mainCamera);
         HideTemplateStimuli();
 
-        TMP_Text[] textObjects = FindObjectsOfType<TMP_Text>(true);
-        foreach (TMP_Text textObject in textObjects)
-        {
-            textObject.color = Color.white;
-            if (textObject.gameObject.name == "instrText")
-            {
-                textObject.text = "";
-            }
-        }
-
         GameObject nameInputObject = GameObject.Find("nameInputField");
         TMP_InputField nameInput = nameInputObject != null
             ? nameInputObject.GetComponent<TMP_InputField>()
             : null;
-        if (nameInput != null)
+        TMP_Text nameInputText = nameInput != null ? nameInput.textComponent : null;
+        TMP_Text nameInputPlaceholder = nameInput != null
+            ? nameInput.placeholder as TMP_Text
+            : null;
+        TMP_Text[] textObjects = FindObjectsOfType<TMP_Text>(true);
+        foreach (TMP_Text textObject in textObjects)
         {
-            nameInput.textComponent.color = new Color32(0x22, 0x22, 0x22, 0xFF);
-            TMP_Text placeholderText = nameInput.placeholder as TMP_Text;
-            if (placeholderText != null)
+            if (textObject != nameInputText && textObject != nameInputPlaceholder)
             {
-                placeholderText.color = new Color32(0x66, 0x66, 0x66, 0xFF);
+                textObject.color = Color.white;
+            }
+
+            if (textObject.gameObject.name == "instrText")
+            {
+                textObject.text = "";
             }
         }
 
@@ -94,6 +92,29 @@ public class GroupCMentalArithmetic : ExperimentBase
         audioSource.playOnAwake = false;
         audioSource.spatialBlend = 0f;
         audioSource.loop = false;
+    }
+
+    protected override void Start()
+    {
+        base.Start();
+
+        if (nameInputField == null)
+        {
+            return;
+        }
+
+        if (nameInputField.textComponent == null)
+        {
+            Debug.LogError("GroupCMentalArithmetic: the participant ID field needs a text component.");
+            return;
+        }
+
+        nameInputField.textComponent.color = new Color32(0x22, 0x22, 0x22, 0xFF);
+        TMP_Text placeholderText = nameInputField.placeholder as TMP_Text;
+        if (placeholderText != null)
+        {
+            placeholderText.color = new Color32(0x66, 0x66, 0x66, 0xFF);
+        }
     }
 
     static void AttachSessionUiToCamera(Camera mainCamera)
