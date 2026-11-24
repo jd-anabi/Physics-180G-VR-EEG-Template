@@ -58,7 +58,7 @@ public class GroupCMentalArithmetic : ExperimentBase
         TMP_Text[] textObjects = FindObjectsOfType<TMP_Text>(true);
         foreach (TMP_Text textObject in textObjects)
         {
-            textObject.color = Color.black;
+            textObject.color = Color.white;
             if (textObject.gameObject.name == "instrText")
             {
                 textObject.text = "";

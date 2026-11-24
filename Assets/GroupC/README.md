@@ -13,9 +13,9 @@ Keep this file up to date. The analysis depends on it.
 The scene is copied from the shared task template so it retains the XR rig,
 eye-tracking setup, participant-ID flow, instructions, and session/event logging.
 It uses the shared `ExperimentBase` session flow. During audio playback the
-camera background is neutral gray and a black X is fixed in the center of the
-headset view. Template demo objects are hidden. The scene has its own HDRP
-volume profile: exposure is fixed, while sky and fog are disabled. The X is
+camera background is neutral gray, a black X is fixed in the center of the
+headset view, and session text is white for contrast. Template demo objects are
+hidden. The scene has its own HDRP volume profile: exposure is fixed, while sky and fog are disabled. The X is
 drawn with two black bars on a world-space UI canvas attached to the headset
 camera. The shared session prompts and participant-ID panel are also positioned
 relative to the headset camera so they remain in view in VR.
@@ -35,12 +35,19 @@ brightness depends on the headset display and exposure configuration.
    provided `mm:ss:hundredths` timestamps to seconds from the start of the
    audio. It logs each task start/end, recovery-rest start/end, and
    post-speech-rest start/end, plus the intro, initial rest start, and final
-   prompt. Phase windows use the explicit start and end times from the supplied
-   schedule; the short gaps between windows are preserved rather than treated
-   as overlap.
+   prompt. The final prompt cue is at 814.5 s, the reported audio onset, before
+   the last post-speech-rest end cue at 814.7 s. Phase windows use the explicit
+   start and end times from the supplied schedule; the short gaps between
+   windows are preserved rather than treated as overlap.
 4. Set `speechMarkerKey` to the operator's marker key (default **Return**).
-   The operator presses it each time the participant answers aloud. Every press
-   during playback is logged with the audio position and the most recent cue.
+   The operator presses it when the participant finishes each spoken answer.
+   Every press during playback is logged with the audio position and the most
+   recent cue. For analysis, exclude the first 1.5 seconds after this marker
+   from the post-speech rest window to reduce speech and jaw-muscle
+   contamination. Use the later of the scheduled rest start and marker time
+   plus 1.5 seconds as the analysis-window start. This is analysis guidance;
+   the repository does not yet include a Group C arithmetic analysis script
+   that applies this exclusion automatically.
 5. In Play mode, focus the ID field (press Space or click it), type a
    non-empty participant ID, and submit it with Enter. The shared session flow
    moves the ID canvas out of view after submission. Instructions appear with

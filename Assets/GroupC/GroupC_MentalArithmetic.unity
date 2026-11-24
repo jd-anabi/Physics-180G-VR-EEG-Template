@@ -1449,10 +1449,10 @@ MonoBehaviour:
     meaning: trial_14_recovery_rest_end
   - timeSeconds: 799.7
     meaning: trial_14_post_speech_rest_start
+  - timeSeconds: 814.5
+    meaning: experiment_end_prompt
   - timeSeconds: 814.7
     meaning: trial_14_post_speech_rest_end
-  - timeSeconds: 818
-    meaning: experiment_end_prompt
   speechMarkerKey: 13
   audioTrack: {fileID: 8300000, guid: 06782c786f6514d78bbb655a54418c3a, type: 3}
 --- !u!82 &840713096
