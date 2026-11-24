@@ -15,10 +15,11 @@ eye-tracking setup, participant-ID flow, instructions, and session/event logging
 It uses the shared `ExperimentBase` session flow. During audio playback the
 camera background is neutral gray, a black X is fixed in the center of the
 headset view, and session text is white for contrast. Template demo objects are
-hidden. The scene has its own HDRP volume profile: exposure is fixed, while sky and fog are disabled. The X is
-drawn with two black bars on a world-space UI canvas attached to the headset
-camera. The shared session prompts and participant-ID panel are also positioned
-relative to the headset camera so they remain in view in VR.
+hidden. The scene has its own HDRP volume profile: exposure is fixed, while sky
+and fog are disabled. The X is drawn with two black bars on a world-space UI
+canvas attached to the headset camera. The shared session prompts and
+participant-ID panel are also positioned relative to the headset camera so
+they remain in view in VR.
 
 Check the gray background brightness in the headset before collecting data.
 Adjust it only after a test run with the actual headset, since perceived
