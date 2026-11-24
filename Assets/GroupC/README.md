@@ -32,14 +32,12 @@ brightness depends on the headset display and exposure configuration.
    `finalfinal_script_interleaved.mp3`. The scene has a persistent AudioSource on this object,
    and the clip is configured to preload so playback can be scheduled without
    the first-play loading delay.
-3. The **Cue Timeline** on Stim Control has 87 entries, converted from the
-   provided `mm:ss:hundredths` timestamps to seconds from the start of the
-   audio. It logs each task start/end, recovery-rest start/end, and
-   post-speech-rest start/end, plus the intro, initial rest start, and final
-   prompt. The final prompt cue is at 814.5 s, the reported audio onset, before
-   the last post-speech-rest end cue at 814.7 s. Phase windows use the explicit
-   start and end times from the supplied schedule; the short gaps between
-   windows are preserved rather than treated as overlap.
+3. The **Cue Timeline** on Stim Control has 87 entries. The initial-rest,
+   task-start, recovery-rest-start, post-speech-rest-start, and final-prompt
+   cue times use the supplied Audacity measurements, converted to seconds
+   from the start of the audio. The other phase boundaries retain the supplied
+   schedule times. The final prompt cue is at 814.373 s, before the final
+   post-speech-rest end cue at 814.7 s.
 4. Set `speechMarkerKey` to the operator's marker key (default **Return**).
    The operator presses it when the participant finishes each spoken answer.
    Every press during playback is logged with the audio position and the most

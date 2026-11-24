@@ -1281,175 +1281,175 @@ MonoBehaviour:
   cueTimeline:
   - timeSeconds: 0
     meaning: experiment_intro
-  - timeSeconds: 16.5
+  - timeSeconds: 16.356005
     meaning: initial_rest_start
-  - timeSeconds: 40
+  - timeSeconds: 39.789093
     meaning: trial_1_task_start_sevens_from_832
   - timeSeconds: 67
     meaning: trial_1_task_end
-  - timeSeconds: 67.5
+  - timeSeconds: 67.278430
     meaning: trial_1_recovery_rest_start
   - timeSeconds: 82.5
     meaning: trial_1_recovery_rest_end
-  - timeSeconds: 85
+  - timeSeconds: 84.587866
     meaning: trial_1_post_speech_rest_start
   - timeSeconds: 95
     meaning: trial_1_post_speech_rest_end
-  - timeSeconds: 98.4
+  - timeSeconds: 98.172915
     meaning: trial_2_task_start_ones_from_526
   - timeSeconds: 119.4
     meaning: trial_2_task_end
-  - timeSeconds: 119.7
+  - timeSeconds: 119.637253
     meaning: trial_2_recovery_rest_start
   - timeSeconds: 134.7
     meaning: trial_2_recovery_rest_end
-  - timeSeconds: 137.3
+  - timeSeconds: 136.932473
     meaning: trial_2_post_speech_rest_start
   - timeSeconds: 147.3
     meaning: trial_2_post_speech_rest_end
-  - timeSeconds: 151
+  - timeSeconds: 150.474385
     meaning: trial_3_task_start_sevens_from_793
   - timeSeconds: 172
     meaning: trial_3_task_end
-  - timeSeconds: 172.2
+  - timeSeconds: 172.029777
     meaning: trial_3_recovery_rest_start
   - timeSeconds: 182.2
     meaning: trial_3_recovery_rest_end
-  - timeSeconds: 184.4
+  - timeSeconds: 184.311639
     meaning: trial_3_post_speech_rest_start
   - timeSeconds: 199.4
     meaning: trial_3_post_speech_rest_end
-  - timeSeconds: 202.9
+  - timeSeconds: 202.654531
     meaning: trial_4_task_start_ones_from_483
   - timeSeconds: 226.9
     meaning: trial_4_task_end
-  - timeSeconds: 227.5
+  - timeSeconds: 227.154408
     meaning: trial_4_recovery_rest_start
   - timeSeconds: 239.5
     meaning: trial_4_recovery_rest_end
-  - timeSeconds: 241.6
+  - timeSeconds: 241.477080
     meaning: trial_4_post_speech_rest_start
   - timeSeconds: 253.6
     meaning: trial_4_post_speech_rest_end
-  - timeSeconds: 257.3
+  - timeSeconds: 256.908207
     meaning: trial_5_task_start_sevens_from_514
   - timeSeconds: 281.3
     meaning: trial_5_task_end
-  - timeSeconds: 282.1
+  - timeSeconds: 281.424260
     meaning: trial_5_recovery_rest_start
   - timeSeconds: 294.1
     meaning: trial_5_recovery_rest_end
-  - timeSeconds: 296
+  - timeSeconds: 295.699996
     meaning: trial_5_post_speech_rest_start
   - timeSeconds: 309
     meaning: trial_5_post_speech_rest_end
-  - timeSeconds: 312.6
+  - timeSeconds: 312.237618
     meaning: trial_6_task_start_ones_from_672
   - timeSeconds: 341.6
     meaning: trial_6_task_end
-  - timeSeconds: 342
+  - timeSeconds: 341.771563
     meaning: trial_6_recovery_rest_start
   - timeSeconds: 356
     meaning: trial_6_recovery_rest_end
-  - timeSeconds: 358.1
+  - timeSeconds: 358.055754
     meaning: trial_6_post_speech_rest_start
   - timeSeconds: 369.1
     meaning: trial_6_post_speech_rest_end
-  - timeSeconds: 372.6
+  - timeSeconds: 372.314088
     meaning: trial_7_task_start_sevens_from_605
   - timeSeconds: 395.6
     meaning: trial_7_task_end
-  - timeSeconds: 396.2
+  - timeSeconds: 395.881122
     meaning: trial_7_recovery_rest_start
   - timeSeconds: 407.2
     meaning: trial_7_recovery_rest_end
-  - timeSeconds: 409.3
+  - timeSeconds: 409.185656
     meaning: trial_7_post_speech_rest_start
   - timeSeconds: 423.3
     meaning: trial_7_post_speech_rest_end
-  - timeSeconds: 426.7
+  - timeSeconds: 426.439699
     meaning: trial_8_task_start_ones_from_891
   - timeSeconds: 452.7
     meaning: trial_8_task_end
-  - timeSeconds: 453.1
+  - timeSeconds: 452.945091
     meaning: trial_8_recovery_rest_start
   - timeSeconds: 466.1
     meaning: trial_8_recovery_rest_end
-  - timeSeconds: 468.4
+  - timeSeconds: 468.283326
     meaning: trial_8_post_speech_rest_start
   - timeSeconds: 480.4
     meaning: trial_8_post_speech_rest_end
-  - timeSeconds: 483.9
+  - timeSeconds: 483.744822
     meaning: trial_9_task_start_sevens_from_921
   - timeSeconds: 513.9
     meaning: trial_9_task_end
-  - timeSeconds: 514.4
+  - timeSeconds: 514.239920
     meaning: trial_9_recovery_rest_start
   - timeSeconds: 528.4
     meaning: trial_9_recovery_rest_end
-  - timeSeconds: 530.6
+  - timeSeconds: 530.543474
     meaning: trial_9_post_speech_rest_start
   - timeSeconds: 541.6
     meaning: trial_9_post_speech_rest_end
-  - timeSeconds: 545.1
+  - timeSeconds: 544.899233
     meaning: trial_10_task_start_ones_from_719
   - timeSeconds: 573.1
     meaning: trial_10_task_end
-  - timeSeconds: 573.6
+  - timeSeconds: 573.444208
     meaning: trial_10_recovery_rest_start
   - timeSeconds: 584.6
     meaning: trial_10_recovery_rest_end
-  - timeSeconds: 587
+  - timeSeconds: 586.722517
     meaning: trial_10_post_speech_rest_start
   - timeSeconds: 601
     meaning: trial_10_post_speech_rest_end
-  - timeSeconds: 604.5
+  - timeSeconds: 604.213326
     meaning: trial_11_task_start_sevens_from_458
   - timeSeconds: 629.5
     meaning: trial_11_task_end
-  - timeSeconds: 629.9
+  - timeSeconds: 629.709281
     meaning: trial_11_recovery_rest_start
   - timeSeconds: 642.9
     meaning: trial_11_recovery_rest_end
-  - timeSeconds: 645.2
+  - timeSeconds: 644.983423
     meaning: trial_11_post_speech_rest_start
   - timeSeconds: 657.2
     meaning: trial_11_post_speech_rest_end
-  - timeSeconds: 660.6
+  - timeSeconds: 660.294942
     meaning: trial_12_task_start_ones_from_914
   - timeSeconds: 680.6
     meaning: trial_12_task_end
-  - timeSeconds: 681.1
+  - timeSeconds: 680.802908
     meaning: trial_12_recovery_rest_start
   - timeSeconds: 693.1
     meaning: trial_12_recovery_rest_end
-  - timeSeconds: 695.2
+  - timeSeconds: 695.115530
     meaning: trial_12_post_speech_rest_start
   - timeSeconds: 708.2
     meaning: trial_12_post_speech_rest_end
-  - timeSeconds: 711.6
+  - timeSeconds: 711.579255
     meaning: trial_13_task_start_sevens_from_689
   - timeSeconds: 733.6
     meaning: trial_13_task_end
-  - timeSeconds: 734.1
+  - timeSeconds: 734.079623
     meaning: trial_13_recovery_rest_start
   - timeSeconds: 749.1
     meaning: trial_13_recovery_rest_end
-  - timeSeconds: 751.5
+  - timeSeconds: 751.366632
     meaning: trial_13_post_speech_rest_start
   - timeSeconds: 761.5
     meaning: trial_13_post_speech_rest_end
-  - timeSeconds: 764.9
+  - timeSeconds: 764.768715
     meaning: trial_14_task_start_ones_from_345
   - timeSeconds: 786.9
     meaning: trial_14_task_end
-  - timeSeconds: 787.4
+  - timeSeconds: 787.259034
     meaning: trial_14_recovery_rest_start
   - timeSeconds: 797.4
     meaning: trial_14_recovery_rest_end
-  - timeSeconds: 799.7
+  - timeSeconds: 799.571043
     meaning: trial_14_post_speech_rest_start
-  - timeSeconds: 814.5
+  - timeSeconds: 814.372636
     meaning: experiment_end_prompt
   - timeSeconds: 814.7
     meaning: trial_14_post_speech_rest_end
